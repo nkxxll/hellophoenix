@@ -6,6 +6,9 @@ defmodule HellophoenixWeb.HelloController do
   end
 
   def show(conn, %{"messenger" => messenger}) do
-    render(conn, :show, messenger: messenger)
+    conn
+    |> assign(:messenger, messenger)
+    |> assign(:message, "This is the message for: ")
+    |> render(:show)
   end
 end

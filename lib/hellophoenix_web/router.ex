@@ -2,7 +2,7 @@ defmodule HellophoenixWeb.Router do
   use HellophoenixWeb, :router
 
   pipeline :browser do
-    plug :accepts, ["html"]
+    plug :accepts, ["html", "json"]
     plug :fetch_session
     plug :fetch_live_flash
     plug :put_root_layout, html: {HellophoenixWeb.Layouts, :root}
@@ -14,12 +14,21 @@ defmodule HellophoenixWeb.Router do
     plug :accepts, ["json"]
   end
 
+  scope "bytes", HellophoenixWeb do
+    pipe_through :browser
+
+    get "/", BytesController, :direct
+  end
+
   scope "/", HellophoenixWeb do
     pipe_through :browser
 
     get "/", PageController, :home
     get "/hello", HelloController, :index
     get "/hello/:messenger", HelloController, :show
+
+    # resources "/users", UserController
+    # resources "/posts", PostController, only: [:index, :show]
   end
 
   # Other scopes may use custom stacks.
