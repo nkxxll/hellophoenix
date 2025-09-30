@@ -1,0 +1,9 @@
+<h1>New User</h1>
+
+<.form :let={f} id="new_user" for={@changeset} action={~p"/users"} method="post">
+  <.input field={f[:name]} type="text" label="Name" />
+  <.input field={f[:email]} type="email" label="Email" />
+  <.input field={f[:bio]} type="textarea" label="Bio" />
+  <.input field={f[:number_of_pets]} type="number" label="Number of pets" />
+  <button>Create</button>
+</.form>

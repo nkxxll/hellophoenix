@@ -14,7 +14,7 @@ defmodule HellophoenixWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "bytes", HellophoenixWeb do
+  scope "/bytes", HellophoenixWeb do
     pipe_through :browser
 
     get "/", BytesController, :direct
@@ -27,8 +27,7 @@ defmodule HellophoenixWeb.Router do
     get "/hello", HelloController, :index
     get "/hello/:messenger", HelloController, :show
 
-    # resources "/users", UserController
-    # resources "/posts", PostController, only: [:index, :show]
+    resources "/users", UserController, only: [:index, :new, :create, :show]
   end
 
   # Other scopes may use custom stacks.
