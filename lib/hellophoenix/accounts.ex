@@ -3,13 +3,7 @@ defmodule Hellophoenix.Accounts do
   alias Hellophoenix.Repo
   alias Hellophoenix.User
 
-  @spec get_user(integer()) :: User
-  def get_user(id) do
-    case Repo.one(from u in User, where: u.id == ^id) do
-      nil -> {:error, nil}
-      user -> {:ok, user}
-    end
-  end
+  def get_user(id), do: Repo.get(User, id)
 
   def create_user(attrs \\ %{}) do
     %User{}

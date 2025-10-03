@@ -7,6 +7,8 @@ defmodule Hellophoenix.User do
     field :email, :string
     field :bio, :string
     field :number_of_pets, :integer
+    field :hashed_password, :string
+    field :confirmed_at, :naive_datetime
 
     timestamps(type: :utc_datetime)
   end

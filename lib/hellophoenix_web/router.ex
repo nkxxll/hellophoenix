@@ -11,6 +11,7 @@ defmodule HellophoenixWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_scope_for_user
+    plug :fetch_current_cart
   end
 
   pipeline :api do
@@ -30,7 +31,7 @@ defmodule HellophoenixWeb.Router do
     get "/hello", HelloController, :index
     get "/hello/:messenger", HelloController, :show
 
-    resources "/users", UserController, only: [:index, :new, :create, :show]
+    # resources "/users", UserController, only: [:index, :new, :create, :show]
     resources "/products", ProductController
   end
 
@@ -81,4 +82,27 @@ defmodule HellophoenixWeb.Router do
     post "/users/log-in", UserSessionController, :create
     delete "/users/log-out", UserSessionController, :delete
   end
+
+  scope "/", HellophoenixWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    resources "/cart_items", CartItemController, only: [:create, :delete]
+
+    get "/cart", CartController, :show
+    put "/cart", CartController, :update
+  end
+
+  alias Hellophoenix.ShoppingCart
+
+  defp fetch_current_cart(%{assigns: %{current_scope: scope}} = conn, _opts)
+       when not is_nil(scope) do
+    if cart = ShoppingCart.get_cart(scope) do
+      assign(conn, :cart, cart)
+    else
+      {:ok, new_cart} = ShoppingCart.create_cart(scope, %{})
+      assign(conn, :cart, new_cart)
+    end
+  end
+
+  defp fetch_current_cart(conn, _opts), do: conn
 end
