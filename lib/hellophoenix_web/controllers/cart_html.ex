@@ -1,7 +1,7 @@
 defmodule HellophoenixWeb.CartHTML do
   use HellophoenixWeb, :html
 
-  alias Hello.ShoppingCart
+  alias Hellophoenix.ShoppingCart
 
   embed_templates "cart_html/*"
 

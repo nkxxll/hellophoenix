@@ -10,6 +10,18 @@ defmodule Hellophoenix.ShoppingCart do
   alias Hellophoenix.ShoppingCart.{Cart, CartItem}
   alias Hellophoenix.Accounts.Scope
 
+  def total_item_price(%CartItem{} = item) do
+    Decimal.mult(item.product.price, item.quantity)
+  end
+
+  def total_cart_price(%Cart{} = cart) do
+    Enum.reduce(cart.items, 0, fn item, acc ->
+      item
+      |> total_item_price()
+      |> Decimal.add(acc)
+    end)
+  end
+
   def get_cart(%Scope{} = scope) do
     Repo.one(
       from(c in Cart,
@@ -112,12 +124,24 @@ defmodule Hellophoenix.ShoppingCart do
   def update_cart(%Scope{} = scope, %Cart{} = cart, attrs) do
     true = cart.user_id == scope.user.id
 
-    with {:ok, cart = %Cart{}} <-
-           cart
-           |> Cart.changeset(attrs, scope)
-           |> Repo.update() do
-      broadcast_cart(scope, {:updated, cart})
-      {:ok, cart}
+    changeset =
+      cart
+      |> Cart.changeset(attrs, scope)
+      |> Ecto.Changeset.cast_assoc(:items, with: &CartItem.changeset/2)
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:cart, changeset)
+    |> Ecto.Multi.delete_all(:discarded_items, fn %{cart: cart} ->
+      from(i in CartItem, where: i.cart_id == ^cart.id and i.quantity == 0)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{cart: cart}} ->
+        broadcast(scope, {:updated, cart})
+        {:ok, cart}
+
+      {:error, :cart, changeset, _changes_so_far} ->
+        {:error, changeset}
     end
   end
 
