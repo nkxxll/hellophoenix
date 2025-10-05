@@ -10,6 +10,11 @@ defmodule Hellophoenix.ShoppingCart do
   alias Hellophoenix.ShoppingCart.{Cart, CartItem}
   alias Hellophoenix.Accounts.Scope
 
+  def prune_cart_items(%Scope{} = scope, %Cart{} = cart) do
+    {_, _} = Repo.delete_all(from(i in CartItem, where: i.cart_id == ^cart.id))
+    {:ok, get_cart(scope)}
+  end
+
   def total_item_price(%CartItem{} = item) do
     Decimal.mult(item.product.price, item.quantity)
   end
@@ -137,7 +142,7 @@ defmodule Hellophoenix.ShoppingCart do
     |> Repo.transaction()
     |> case do
       {:ok, %{cart: cart}} ->
-        broadcast(scope, {:updated, cart})
+        broadcast_cart(scope, {:updated, cart})
         {:ok, cart}
 
       {:error, :cart, changeset, _changes_so_far} ->
