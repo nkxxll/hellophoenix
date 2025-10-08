@@ -31,6 +31,14 @@ defmodule HellophoenixWeb.Router do
     get "/hello", HelloController, :index
     get "/hello/:messenger", HelloController, :show
 
+    live_session :search,
+      on_mount: [{HellophoenixWeb.UserAuth, :mount_current_scope}] do
+      live "/items", ItemLive.Index, :index
+      live "/items/new", ItemLive.Form, :new
+      live "/items/:id", ItemLive.Show, :show
+      live "/items/:id/edit", ItemLive.Form, :edit
+    end
+
     # resources "/users", UserController, only: [:index, :new, :create, :show]
     resources "/products", ProductController
   end

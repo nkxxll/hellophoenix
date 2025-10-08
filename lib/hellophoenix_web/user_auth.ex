@@ -216,4 +216,19 @@ defmodule HellophoenixWeb.UserAuth do
   end
 
   defp maybe_store_return_to(conn), do: conn
+
+  def on_mount(:mount_current_scope, _params, session, socket) do
+    {:cont, mount_current_scope(socket, session)}
+  end
+
+  defp mount_current_scope(socket, session) do
+    Phoenix.Component.assign_new(socket, :current_scope, fn ->
+      {user, _last_login_at} =
+        if user_token = session["user_token"] do
+          Accounts.get_user_by_session_token(user_token)
+        end
+
+      Scope.for_user(user)
+    end)
+  end
 end
